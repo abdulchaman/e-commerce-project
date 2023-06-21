@@ -50,7 +50,7 @@ const App = ()=>{
                             handleRemoveFromCart={handleRemoveFromCart}
                             handleEmptyCart={handleEmptyCart}
                         ></Cart>}></Route>
-                        <Route path="checkout" element={<Checkout></Checkout>}></Route>
+                        <Route path="checkout" element={<Checkout cart={cart}></Checkout>}></Route>
                     <Route/>
                 </Routes>
             </div>
