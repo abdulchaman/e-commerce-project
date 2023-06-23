@@ -65,4 +65,4 @@ const Cart = ({ cart, handleUpdateCartQty, handleRemoveFromCart, handleEmptyCart
 
 }
 
-export default Cart
+export default Cart;

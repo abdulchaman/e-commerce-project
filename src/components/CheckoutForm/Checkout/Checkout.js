@@ -19,7 +19,7 @@ const Checkout = ({ cart }) => {
       try{
           const token = await commerce.checkout.generateToken(cart.id, {type:'cart'}) ;
           setCheckoutToken(token);
-          console.log(token)
+          // console.log(token)
       }
       catch(error){
           console.log("error:", error)
@@ -51,7 +51,7 @@ const Checkout = ({ cart }) => {
     }
     else{
       return(
-        <PaymentForm></PaymentForm>
+        <PaymentForm shippingData={shippingData} checkoutToken={checkoutToken} backStep={backStep}></PaymentForm>
       )
     }
   } 
