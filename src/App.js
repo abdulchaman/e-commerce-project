@@ -8,6 +8,8 @@ import Main from "./Main";
 const App = ()=>{
     const [products,setProducts] = useState([]);
     const [cart, setCart] = useState({});
+    const [order, setOrder] = useState({});
+    const [errorMessage, setErrorMessage] = useState('');
 
     const fetchProducts = async()=>{
         const {data} = await commerce.products.list();
@@ -33,6 +35,21 @@ const App = ()=>{
     const handleEmptyCart = async()=>{
         setCart(await commerce.cart.empty());
     }
+
+    const refreshCart = async()=>{
+        setCart(await commerce.cart.refresh());
+    }
+
+    const handleCaptureCheckout = async (checkoutTokenId, newOrder)=>{
+        try{
+            const incomingOrder = await commerce.checkout.capture(checkoutTokenId, newOrder);
+            setOrder(incomingOrder);
+            refreshCart();
+            console.log('refresh')
+        }catch(error){
+            setErrorMessage(error.data.error.message)
+        }
+    }
     useEffect(()=>{
         fetchProducts();
         fetchCart();
@@ -50,7 +67,14 @@ const App = ()=>{
                             handleRemoveFromCart={handleRemoveFromCart}
                             handleEmptyCart={handleEmptyCart}
                         ></Cart>}></Route>
-                        <Route path="checkout" element={<Checkout cart={cart}></Checkout>}></Route>
+                        <Route path="checkout" element={<Checkout 
+                            cart={cart}
+                            order={order}
+                            onCaptureCheckout={handleCaptureCheckout}
+                            error={errorMessage}
+                            refreshCart={refreshCart}
+                            ></Checkout>}>
+                        </Route>
                     <Route/>
                 </Routes>
             </div>

@@ -1,5 +1,6 @@
 import React,{useState, useEffect} from 'react';
-import { Paper, Stepper, Step, StepLabel, Typography, CircularProgress, Divider, Button } from '@material-ui/core';
+import { Paper, Stepper, Step, StepLabel, Typography, CircularProgress, Divider, Button, CssBaseline } from '@material-ui/core';
+import { Link, useNavigate  } from "react-router-dom"; 
 
 import { commerce } from "../../../lib/commerce";
 import AddressForm from "../AddressForm";
@@ -8,12 +9,13 @@ import useStyles from "./styles";
 
 const steps = ['Shipping address', 'Payment details'];
 
-const Checkout = ({ cart }) => {
+const Checkout = ({ cart, order, onCaptureCheckout, error, refreshCart }) => {
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
   const [checkoutToken, setCheckoutToken] = useState(null);
   const [shippingData, setShippingData] = useState({});
-
+  const [isFinished, setIsFinished] = useState(false);
+  const navigate = useNavigate();
   useEffect(()=>{
     const generateToken = async()=>{
       try{
@@ -22,7 +24,7 @@ const Checkout = ({ cart }) => {
           // console.log(token)
       }
       catch(error){
-          console.log("error:", error)
+        navigate('/');
       }
     }
     generateToken();
@@ -36,12 +38,53 @@ const Checkout = ({ cart }) => {
     nextStep();
   }
 
-  const Confirmation = ()=>{
-    return(
-      <div>
-        Confirmation
-      </div>
-    )
+  const timeout = ()=>{
+    setTimeout(()=>{
+        setIsFinished(true);
+    },3000)
+  }
+
+  const Confirmation = ()=> {
+    if(order.customer){
+      return(
+        <>
+          <div>
+            <Typography variant='h5'>Thank you for your purchase, {order.customer.firstname} {order.customer.lastname}</Typography>
+            <Divider className={classes.divider}></Divider>
+            <Typography variant='subtitle2'>Order ref: {order.customer_reference}</Typography>
+          </div>
+          <br/>
+          <Button component={Link} to="/" variant='outlined' type='button'>Back to Home</Button>
+        </>
+      )
+    }
+    else if(isFinished){
+      return(
+        <>
+          <div>
+            <Typography variant='h5'>Thank you for your purchase</Typography>
+            <Divider className={classes.divider}></Divider>
+          </div>
+          <br/>
+          <Button component={Link} to="/" variant='outlined' type='button'>Back to Home</Button>
+        </>
+      )
+    }
+    else{
+      return(
+        <div className={classes.spinner}>
+          <CircularProgress></CircularProgress>
+        </div>
+      )
+    }
+
+  }
+  if(error){
+    <>
+      <Typography variant='h5'>Error: {error}</Typography>
+      <br/>
+      <Button component={Link} to="/" variant='outlined' type='button'>Back to Home</Button>
+    </>
   }
   const Form = ()=>{
     if(activeStep === 0){
@@ -51,12 +94,13 @@ const Checkout = ({ cart }) => {
     }
     else{
       return(
-        <PaymentForm shippingData={shippingData} checkoutToken={checkoutToken} backStep={backStep}></PaymentForm>
+        <PaymentForm shippingData={shippingData} checkoutToken={checkoutToken} nextStep={nextStep} backStep={backStep} onCaptureCheckout={onCaptureCheckout} timeout={timeout} refreshCart={refreshCart}></PaymentForm>
       )
     }
   } 
   return (
     <>
+      <CssBaseline/>
       <div className={classes.toolbar}></div>
       <main>
         <Paper className={classes.paper}>
